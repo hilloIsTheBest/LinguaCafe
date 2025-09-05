@@ -1,0 +1,49 @@
+
+version: '3.8'
+services:
+  audiobooks-api:
+    build: ./audiobooks-api
+    environment:
+      - AUDIOBOOKS_DIR=/audiobooks
+      - ABS_URL=${ABS_URL:-}
+      - ABS_TOKEN=${ABS_TOKEN:-}
+      - LIBRECHAT_URL=${LIBRECHAT_URL:-http://localhost:3080}
+      - TRANSCRIPT_DIR=/data/transcripts
+      - STT_PROVIDER=${STT_PROVIDER:-localai}
+      - STT_URL=${STT_URL:-http://localai:8080/v1/audio/transcriptions}
+      - STT_API_KEY=${STT_API_KEY:-}
+      - STT_MODEL=${STT_MODEL:-whisper-1}
+      - RAG_INDEX_URL=${RAG_INDEX_URL:-}
+      - RAG_API_KEY=${RAG_API_KEY:-}
+    volumes:
+      - ./audiobooks:/audiobooks:ro
+      - ./transcripts:/data/transcripts
+    ports:
+      - "3456:3456"
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./audiobooks:/audiobooks
+      - ./abs-config:/config
+      - ./abs-metadata:/metadata
+    ports:
+      - "13378:80"
+    restart: unless-stopped
+
+  # Optional offline LLM/STT provider (OpenAI-compatible API)
+  localai:
+    image: ghcr.io/go-skynet/local-ai:latest
+    environment:
+      - MODELS_PATH=/models
+    volumes:
+      - ./models:/models
+    ports:
+      - "8080:8080"
+
+# Notes:
+# - Run LibreChat (from ./librechat) using its own docker-compose or npm scripts
+# - This compose launches Audiobookshelf, Audiobooks API and optional LocalAI.

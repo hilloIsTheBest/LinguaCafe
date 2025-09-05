@@ -1,0 +1,134 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LibreAudioChat</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    .layout { display: grid; grid-template-columns: 1fr 420px; height: 100vh; }
+    .left { padding: 16px; overflow: auto; }
+    .right { border-left: 1px solid #ddd; }
+    .player { margin-bottom: 16px; }
+    .book { padding: 8px; border: 1px solid #ddd; border-radius: 6px; margin: 4px 0; cursor: pointer; }
+    .tracks { margin-top: 8px; }
+    iframe { width: 100%; height: 100%; border: 0; }
+    .actions { display:flex; gap: 8px; margin-bottom: 8px; }
+    .badge { display:inline-block; padding:4px 8px; border:1px solid #999; border-radius:12px; font-size:12px; }
+  </style>
+  <script>
+  async function fetchJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  }
+  async function loadBooks() {
+    const list = document.getElementById('books');
+    list.innerHTML = 'Loading...';
+    try {
+      const books = await fetchJSON('/api/audiobooks');
+      list.innerHTML = '';
+      for (const b of books) {
+        const div = document.createElement('div');
+        div.className = 'book';
+        div.textContent = b.title + (b.author ? (' — ' + b.author) : '');
+        div.onclick = () => selectBook(b);
+        list.appendChild(div);
+      }
+    } catch (e) {
+      list.textContent = 'Failed to load books: ' + e.message;
+    }
+  }
+  let currentBook = null;
+  async function selectBook(book) {
+    currentBook = book;
+    document.getElementById('currentBook').textContent = book.title;
+    const tracksEl = document.getElementById('tracks');
+    tracksEl.innerHTML = 'Loading tracks...';
+    try {
+      const tracks = await fetchJSON(`/api/audiobooks/${encodeURIComponent(book.id)}/tracks`);
+      tracksEl.innerHTML = '';
+      for (const t of tracks) {
+        const a = document.createElement('a');
+        a.href = t.url;
+        a.textContent = t.file;
+        a.onclick = (ev) => { ev.preventDefault(); playTrack(t.url); };
+        const li = document.createElement('div');
+        li.appendChild(a);
+        tracksEl.appendChild(li);
+      }
+    } catch (e) {
+      tracksEl.textContent = 'Failed to load tracks: ' + e.message;
+    }
+  }
+  function playTrack(url) {
+    const audio = document.getElementById('audio');
+    audio.src = url;
+    audio.play();
+  }
+  async function startTranscription() {
+    const status = document.getElementById('status');
+    if (!currentBook) { status.textContent = 'Select a book first.'; return; }
+    status.textContent = 'Starting transcription...';
+    try {
+      await fetch(`/api/audiobooks/${encodeURIComponent(currentBook.id)}/transcribe`, { method: 'POST'});
+      pollStatus();
+    } catch (e) {
+      status.textContent = 'Failed to start transcription: ' + e.message;
+    }
+  }
+  async function pollStatus() {
+    const status = document.getElementById('status');
+    if (!currentBook) return;
+    try {
+      const s = await fetchJSON(`/api/audiobooks/${encodeURIComponent(currentBook.id)}/transcribe/status`);
+      status.textContent = `Status: ${s.status}${s.progress? ' ('+s.progress+'%)':''}`;
+      if (s.status === 'in_progress') setTimeout(pollStatus, 2000);
+      if (s.status === 'completed') loadTranscript();
+    } catch (e) {
+      status.textContent = 'Status error: ' + e.message;
+    }
+  }
+  async function loadTranscript() {
+    const out = document.getElementById('transcript');
+    if (!currentBook) return;
+    try {
+      const res = await fetch(`/api/audiobooks/${encodeURIComponent(currentBook.id)}/transcript`);
+      if (res.ok) {
+        out.textContent = await res.text();
+      } else {
+        out.textContent = 'Transcript not found.';
+      }
+    } catch (e) {
+      out.textContent = 'Load transcript error: ' + e.message;
+    }
+  }
+  window.addEventListener('load', () => {
+    loadBooks();
+    const chatUrl = (new URLSearchParams(location.search)).get('chat') || 'http://localhost:3080';
+    document.getElementById('chat').src = chatUrl;
+  });
+  </script>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="left">
+        <h2 id="currentBook">Audiobooks</h2>
+        <div class="player">
+          <audio id="audio" controls preload="none" style="width:100%"></audio>
+        </div>
+        <div class="actions">
+          <button onclick="startTranscription()">Transcribe Book</button>
+          <span id="status" class="badge">Idle</span>
+        </div>
+        <div id="books"></div>
+        <div class="tracks" id="tracks"></div>
+        <pre id="transcript" style="white-space:pre-wrap"></pre>
+      </div>
+      <div class="right">
+        <iframe id="chat" src="about:blank" title="Chat"></iframe>
+      </div>
+    </div>
+  </body>
+</html>
