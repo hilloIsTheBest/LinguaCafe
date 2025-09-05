@@ -7,7 +7,7 @@ networks:
 services:
     webserver:
         build:
-            context: https://github.com/hilloIsTheBest/LinguaCafe.git#feature/desktop-branding
+            context: https://codeload.github.com/hilloIsTheBest/LinguaCafe/tar.gz/refs/heads/feature/desktop-branding
             dockerfile: docker/PhpDockerfile
         container_name: linguacafe-webserver
         restart: unless-stopped
@@ -76,7 +76,7 @@ services:
         restart: unless-stopped
         tty: true
         build:
-            context: https://github.com/hilloIsTheBest/LinguaCafe.git#feature/desktop-branding
+            context: https://codeload.github.com/hilloIsTheBest/LinguaCafe/tar.gz/refs/heads/feature/desktop-branding
             dockerfile: docker/PythonDockerfile
         environment:
             PYTHONPATH: "/var/www/html/storage/app/model"
