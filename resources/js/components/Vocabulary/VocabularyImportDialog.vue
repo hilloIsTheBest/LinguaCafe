@@ -78,9 +78,7 @@
                     ></v-switch>
 
                     <!-- Import information -->
-                    <v-alert dark class="mt-4" border="left" type="error" color="error" v-if="!loading && importResult !== null && importResult.error">
-                        An error has occured while importing. Please make sure that your file is in the correct format.
-                    </v-alert>
+                    <v-alert dark class="mt-4" border="left" type="error" color="error" v-if="!loading && importResult !== null && importResult.error"><div v-if="importResult.message">{{ importResult.message }}</div><div v-else>An error has occured while importing. Please make sure that your file is in the correct format.</div></v-alert>
                 </template>
 
                 <!-- Importing message -->
@@ -215,11 +213,13 @@
                 }).catch((error) => {
                     this.loading = false;
                     this.importFile = null;
+                    const msg = (error && error.response && error.response.data && (error.response.data.message || error.response.data)) ? (error.response.data.message || error.response.data) : 'An error occurred while importing.';
                     this.importResult = {
                         createdWords: 0,
                         updatedWords: 0,
                         rejectedWords: 0,
-                        error: true
+                        error: true,
+                        message: msg
                     };
                 });
             },
@@ -229,3 +229,4 @@
         }
     }
 </script>
+
