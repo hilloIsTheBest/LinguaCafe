@@ -6,9 +6,7 @@ networks:
 
 services:
     webserver:
-        build:
-            context: https://codeload.github.com/hilloIsTheBest/LinguaCafe/tar.gz/refs/heads/feature/desktop-branding
-            dockerfile: docker/PhpDockerfile
+        image: ghcr.io/hilloisthebest/linguacafe-webserver:${VERSION:-feature-desktop-branding}
         container_name: linguacafe-webserver
         restart: unless-stopped
         depends_on:
@@ -75,9 +73,7 @@ services:
         command: "python3 /app/tokenizer.py"
         restart: unless-stopped
         tty: true
-        build:
-            context: https://codeload.github.com/hilloIsTheBest/LinguaCafe/tar.gz/refs/heads/feature/desktop-branding
-            dockerfile: docker/PythonDockerfile
+        image: ghcr.io/hilloisthebest/linguacafe-python-service:${VERSION:-feature-desktop-branding}
         environment:
             PYTHONPATH: "/var/www/html/storage/app/model"
         volumes:
