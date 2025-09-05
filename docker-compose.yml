@@ -6,12 +6,16 @@ networks:
 
 services:
     webserver:
-        image: ghcr.io/simjanos-dev/linguacafe-webserver:${VERSION:-latest}
+        build:
+            context: https://github.com/hilloIsTheBest/LinguaCafe.git#feature/desktop-branding
+            dockerfile: docker/PhpDockerfile
         container_name: linguacafe-webserver
         restart: unless-stopped
         depends_on:
             mysql:
                 condition: service_healthy
+            python:
+                condition: service_started
         volumes:
             - ./storage:/var/www/html/storage
             - ./docker/supervisor-horizon.conf:/etc/supervisor/conf.d/horizon.conf
@@ -71,7 +75,9 @@ services:
         command: "python3 /app/tokenizer.py"
         restart: unless-stopped
         tty: true
-        image: ghcr.io/simjanos-dev/linguacafe-python-service:${VERSION:-latest}
+        build:
+            context: https://github.com/hilloIsTheBest/LinguaCafe.git#feature/desktop-branding
+            dockerfile: docker/PythonDockerfile
         environment:
             PYTHONPATH: "/var/www/html/storage/app/model"
         volumes:
