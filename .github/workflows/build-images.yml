@@ -12,7 +12,7 @@ env:
   PY_IMAGE_NAME: linguacafe-python-service
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -30,8 +30,25 @@ jobs:
           docker run --rm \
             -v "$PWD:/app" \
             -w /app \
-            composer:2 \
-            update jumbojett/openid-connect-php --no-interaction --no-ansi
+            php:8.2-cli bash -lc '
+              set -euo pipefail
+              apt-get update && apt-get install -y --no-install-recommends git unzip zip libzip-dev >/dev/null
+              docker-php-ext-install pcntl >/dev/null 2>&1 || true
+              curl -sS https://getcomposer.org/installer -o /tmp/installer.php
+              php /tmp/installer.php --install-dir=/usr/local/bin --filename=composer
+              git config --global --add safe.directory /app
+              composer update jumbojett/openid-connect-php --no-interaction --no-ansi
+            '
+
+      - name: Commit composer.lock if changed
+        run: |
+          if ! git diff --quiet -- composer.lock; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add composer.lock
+            git commit -m "chore(ci): sync composer.lock for jumbojett/openid-connect-php"
+            git push
+          fi
 
       - name: Login to GHCR
         uses: docker/login-action@v3
