@@ -1,18 +1,22 @@
 #!/bin/sh
+set -e
+
+# Ensure we run from the app root
+cd /var/www/html
 
 # Folders needed for persistence
 folder_paths="
-    ./storage/app/dictionaries
-    ./storage/app/fonts
-    ./storage/app/images/book_images
-    ./storage/app/public
-    ./storage/app/temp/dictionaries
-    ./storage/framework/cache/data
-    ./storage/framework/sessions
-    ./storage/framework/testing
-    ./storage/framework/views
-    ./storage/logs
-    ./storage/backup
+    /var/www/html/storage/app/dictionaries
+    /var/www/html/storage/app/fonts
+    /var/www/html/storage/app/images/book_images
+    /var/www/html/storage/app/public
+    /var/www/html/storage/app/temp/dictionaries
+    /var/www/html/storage/framework/cache/data
+    /var/www/html/storage/framework/sessions
+    /var/www/html/storage/framework/testing
+    /var/www/html/storage/framework/views
+    /var/www/html/storage/logs
+    /var/www/html/storage/backup
 "
 
 # Ensure the folders exist
