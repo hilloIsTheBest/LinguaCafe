@@ -117,7 +117,12 @@
                     >
                         <div v-html="errorMessage"></div>
                     </v-alert>
-                </v-form>`n            </v-card-text>`n            <v-card-text class="pt-0 pb-6">`n                <label class="font-weight-bold">Saved words limit (0 = unlimited)</label>`n                <v-text-field v-model.number="savedWordsLimit" type="number" filled dense rounded min="0" :disabled="saving"></v-text-field>`n            </v-card-text>
+                </v-form>
+            </v-card-text>
+            <v-card-text class="pt-0 pb-6">
+                <label class="font-weight-bold">Saved words limit (0 = unlimited)</label>
+                <v-text-field v-model.number="savedWordsLimit" type="number" filled dense rounded min="0" :disabled="saving"></v-text-field>
+            </v-card-text>
             
             <v-card-actions>
                 <v-spacer></v-spacer>
@@ -180,7 +185,8 @@
                 email: this.$props._email,
                 password: '',
                 passwordConfirmation: '',
-                isAdmin: Boolean(this.$props._isAdmin),`n                savedWordsLimit: 0,
+                isAdmin: Boolean(this.$props._isAdmin),
+                savedWordsLimit: 0,
 
                 rules: {
                     nameLength: value => {
@@ -221,7 +227,9 @@
                     userId: this.userId,
                     name: this.name,
                     email: this.email,
-                    isAdmin: this.isAdmin,`n                    savedWordsLimit: this.savedWordsLimit || 0`n                };
+                    isAdmin: this.isAdmin,
+                    savedWordsLimit: this.savedWordsLimit || 0
+                };
 
                 var url = '/users/update';
                 if (this.userId === -1) {

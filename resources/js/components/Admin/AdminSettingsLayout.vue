@@ -27,13 +27,13 @@
                 <admin-font-type-settings></admin-font-type-settings>
             </v-tab-item>
             <v-tab-item :value="5">
-                <admin-api-settings></admin-api-settings>
+                <admin-brand-settings></admin-brand-settings>
             </v-tab-item>
             <v-tab-item :value="6">
-                <admin-review-settings></admin-review-settings>
+                <admin-api-settings></admin-api-settings>
             </v-tab-item>
             <v-tab-item :value="7">
-                <admin-brand-settings></admin-brand-settings>
+                <admin-review-settings></admin-review-settings>
             </v-tab-item>
         </v-tabs-items>
     </v-container>
@@ -54,9 +54,9 @@
                     'languages': 2,
                     'dictionaries': 3,
                     'font-types': 4,
-                    'api': 5,
-                    'reviews': 6,
-                    'branding': 7,
+                    'branding': 5,
+                    'api': 6,
+                    'reviews': 7,
                 },
                 tabUrls: [
                     'dashboard',
@@ -64,8 +64,10 @@
                     'languages',
                     'dictionaries',
                     'font-types',
+                    'branding',
                     'api',
-                    'reviews',\n                    'branding',\n                ]
+                    'reviews',
+                ]
             }
         },
         props: {
