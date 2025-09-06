@@ -22,6 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -38,14 +41,17 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE_NAME }}:feature-desktop-branding
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE_NAME }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.WEB_IMAGE_NAME }}:cache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   build-python:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -63,6 +69,5 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.PY_IMAGE_NAME }}:feature-desktop-branding
             ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.PY_IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.PY_IMAGE_NAME }}:cache
-          cache-to: type=registry,ref=ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.PY_IMAGE_NAME }}:cache,mode=max
-
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
