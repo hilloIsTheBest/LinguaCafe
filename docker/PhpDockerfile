@@ -56,7 +56,9 @@ COPY --from=node_build /build/public /var/www/html/public
 
 RUN addgroup --gid 1000 laravel \
     && adduser --ingroup laravel --disabled-password --gecos "" --shell /bin/sh laravel \
-    && chown -R laravel /var/www/html
+    && chown -R laravel /var/www/html \
+    && chmod +x /var/www/html/entrypoint.sh \
+    && sed -i 's/\r$//' /var/www/html/entrypoint.sh
 USER laravel
 
 RUN composer install --optimize-autoloader --no-dev
