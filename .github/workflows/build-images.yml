@@ -32,12 +32,12 @@ jobs:
             -w /app \
             php:8.2-cli bash -lc '
               set -euo pipefail
-              apt-get update && apt-get install -y --no-install-recommends git unzip zip libzip-dev >/dev/null
+              apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates unzip zip libzip-dev >/dev/null
               docker-php-ext-install pcntl >/dev/null 2>&1 || true
               curl -sS https://getcomposer.org/installer -o /tmp/installer.php
               php /tmp/installer.php --install-dir=/usr/local/bin --filename=composer
               git config --global --add safe.directory /app
-              composer update jumbojett/openid-connect-php --no-interaction --no-ansi
+              composer update jumbojett/openid-connect-php --no-interaction --no-ansi --ignore-platform-req=ext-pcntl
             '
 
       - name: Commit composer.lock if changed
