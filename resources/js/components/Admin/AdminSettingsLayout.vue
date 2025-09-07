@@ -8,6 +8,7 @@
             <v-tab>Fonts</v-tab>
             <v-tab>Branding</v-tab>
             <v-tab>API</v-tab>
+            <v-tab>OIDC</v-tab>
             <v-tab>Reviews</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab" id="admin-tab-items" elevation="0" class="no-background rounded-lg mt-4 pa-6">
@@ -33,6 +34,9 @@
                 <admin-api-settings></admin-api-settings>
             </v-tab-item>
             <v-tab-item :value="7">
+                <admin-oidc-settings></admin-oidc-settings>
+            </v-tab-item>
+            <v-tab-item :value="8">
                 <admin-review-settings></admin-review-settings>
             </v-tab-item>
         </v-tabs-items>
@@ -56,7 +60,8 @@
                     'font-types': 4,
                     'branding': 5,
                     'api': 6,
-                    'reviews': 7,
+                    'oidc': 7,
+                    'reviews': 8,
                 },
                 tabUrls: [
                     'dashboard',
@@ -66,6 +71,7 @@
                     'font-types',
                     'branding',
                     'api',
+                    'oidc',
                     'reviews',
                 ]
             }

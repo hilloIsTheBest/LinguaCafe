@@ -58,6 +58,7 @@ import ImportEbookFileSource from './components/Library/Import/ImportSource/Impo
 import ImportYoutubeSubtitleSource from './components/Library/Import/ImportSource/ImportYoutubeSubtitleSource.vue';
 import ImportJellyfinSubtitleSource from './components/Library/Import/ImportSource/ImportJellyfinSubtitleSource.vue';
 import ImportWebsiteSource from './components/Library/Import/ImportSource/ImportWebsiteSource.vue';
+import ImportLingqCsvSource from './components/Library/Import/ImportSource/ImportLingqCsvSource.vue';
 import ImportLibraryOptions from './components/Library/Import/ImportLibraryOptions.vue';
 import ImportOptions from './components/Library/Import/ImportOptions.vue';
 Vue.component('import-dialog', ImportDialog);
@@ -69,6 +70,7 @@ Vue.component('import-ebook-file-source', ImportEbookFileSource);
 Vue.component('import-youtube-subtitle-source', ImportYoutubeSubtitleSource);
 Vue.component('import-jellyfin-subtitle-source', ImportJellyfinSubtitleSource);
 Vue.component('import-website-source', ImportWebsiteSource);
+Vue.component('import-lingq-csv-source', ImportLingqCsvSource);
 Vue.component('import-library-options', ImportLibraryOptions);
 Vue.component('import-options', ImportOptions);
 
@@ -198,6 +200,7 @@ Vue.component('admin-libre-translate-dictionary-creation', AdminLibreTranslateDi
 Vue.component('admin-edit-user-dialog', AdminEditUserDialog);
 Vue.component('admin-review-settings', AdminReviewSettings);
 Vue.component('admin-brand-settings', require('./components/Admin/AdminBrandSettings.vue').default);
+Vue.component('admin-oidc-settings', require('./components/Admin/AdminOidcSettings.vue').default);
 
 
 // user manual

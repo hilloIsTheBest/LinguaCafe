@@ -58,6 +58,14 @@
                 <span>Website</span>
             </div>
 
+            <!-- LingQ CSV -->
+            <div class="import-type-button rounded-lg mx-2 mb-4" @click="selectImportType('lingq-csv')">
+                <div class="import-type-button-icon-box">
+                    <v-icon large>mdi-database-import</v-icon>
+                </div>
+                <span>LingQ CSV</span>
+            </div>
+
             <!--
             <div class="import-type-button rounded-lg mx-2 mb-4" @click="selectImportType('rss')">
                 <div class="import-type-button-icon-box">

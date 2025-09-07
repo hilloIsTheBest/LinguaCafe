@@ -607,4 +607,15 @@ div.v-data-table {
 
 #navigation-drawer.eink {
     transition-duration: 0s !important;
+}// Alt Library layout helpers
+.lingq-cards-scroll {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+.lingq-card {
+    min-width: 180px;
+    max-width: 200px;
+    margin-right: 16px;
+    cursor: pointer;
 }

@@ -78,6 +78,15 @@
                         <v-icon class="mr-1">mdi-view-agenda</v-icon>
                         Detailed
                     </v-btn>
+                    <v-btn
+                        class="menu-button justify-start"
+                        tile
+                        color="white"
+                        @click="setLayout('lingq')"
+                    >
+                        <v-icon class="mr-1">mdi-view-carousel</v-icon>
+                        LingQ style
+                    </v-btn>
                 </v-menu>
 
                 <v-spacer></v-spacer>
@@ -125,6 +134,24 @@
                 >
                     <v-icon class="mr-1">mdi-import</v-icon>Import
                 </v-btn>
+        </div>
+
+        <!-- LingQ-like layout -->
+        <div v-if="openedBook === -1 && layout === 'lingq'">
+            <v-text-field dense rounded filled prepend-inner-icon="mdi-magnify" placeholder="Search Library" class="mb-4"></v-text-field>
+            <div class="d-flex flex-wrap mb-6">
+                <v-btn class="mr-2 mb-2" depressed rounded @click="importDialog.active = true"><v-icon left>mdi-database-import</v-icon>LingQ</v-btn>
+                <v-btn class="mr-2 mb-2" depressed rounded @click="importDialog.active = true"><v-icon left color="red">mdi-youtube</v-icon>YouTube</v-btn>
+                <v-btn class="mr-2 mb-2" depressed rounded @click="importDialog.active = true"><v-icon left>mdi-netflix</v-icon>Netflix</v-btn>
+                <v-btn class="mr-2 mb-2" depressed rounded @click="importDialog.active = true"><v-icon left>mdi-microphone</v-icon>TED</v-btn>
+            </div>
+            <div class="mb-2 text-subtitle-1">Books</div>
+            <div class="lingq-cards-scroll">
+                <div class="lingq-card" v-for="(book, i) in books" :key="book.id" @click="openBook(book.id)">
+                    <v-img :src="book.cover_image" height="150" class="rounded-lg grey lighten-2"></v-img>
+                    <div class="mt-2 text-truncate">{{ book.name }}</div>
+                </div>
+            </div>
         </div>
 
         <!-- Book list table -->

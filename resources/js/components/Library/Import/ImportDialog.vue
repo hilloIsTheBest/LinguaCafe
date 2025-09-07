@@ -97,6 +97,12 @@
                                 @text-selected="selectImportText" 
                             ></import-youtube-subtitle-source>
 
+                            <!-- LingQ CSV -->
+                            <import-lingq-csv-source
+                                v-if="stepperPage == 2 && importType == 'lingq-csv'"
+                                @text-selected="selectImportText"
+                            ></import-lingq-csv-source>
+
                             <!-- Jellyfin subtitle -->
                             <import-jellyfin-subtitle-source
                                 v-if="stepperPage == 2 && importType == 'jellyfin-subtitle'"
@@ -334,7 +340,7 @@
                 
                 if (this.importType === 'e-book') {
                     data.set('importFile', this.importFile);
-                } else if (['youtube', 'plain-text', 'text-file', 'website'].includes(this.importType)) {
+                } else if (['youtube', 'plain-text', 'text-file', 'website', 'lingq-csv'].includes(this.importType)) {
                     data.set('importText', this.importText);
                 } if (['jellyfin-subtitle', 'subtitle-file'].includes(this.importType)) {
                     data.set('importSubtitles', JSON.stringify(this.importSubtitles));
