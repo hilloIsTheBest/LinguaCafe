@@ -76,13 +76,15 @@ class BookService {
             ->update(['word_count' => $bookWordCount]);
     }
 
-    public function createBook($userId, $selectedLanguage, $bookName, $bookCoverFile) {
+    public function createBook($userId, $selectedLanguage, $bookName, $bookCoverFile, bool $isPublic = false, array $tags = []) {
         // create book model
         $book = new Book();
         $book->user_id = $userId;
         $book->cover_image = null;
         $book->language = $selectedLanguage;
         $book->name = $bookName;
+        $book->is_public = $isPublic;
+        $book->tags = empty($tags) ? null : json_encode(array_values($tags));
 
         // save new book
         $book->save();
@@ -95,7 +97,7 @@ class BookService {
         return true;
     }
 
-    public function updateBook($userId, $bookId, $bookName, $bookCoverFile) {
+    public function updateBook($userId, $bookId, $bookName, $bookCoverFile, bool $isPublic = false, array $tags = []) {
         $book = Book
             ::where('user_id', $userId)
             ->where('id', $bookId)
@@ -107,6 +109,8 @@ class BookService {
 
         // update and save book
         $book->name = $bookName;
+        $book->is_public = $isPublic;
+        $book->tags = empty($tags) ? null : json_encode(array_values($tags));
         $book->save();
         
         // update image

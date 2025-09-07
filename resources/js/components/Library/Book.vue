@@ -36,6 +36,7 @@
                             <v-btn class="menu-button" tile color="white" @click="retryFailedImports()">Retry failed imports</v-btn>
                             <v-btn class="menu-button" tile color="white" @click="showEditBookDialog()">Edit</v-btn>
                             <v-btn class="menu-button" tile color="white" @click="showStartReviewDialog()">Review</v-btn>
+                            <v-btn class="menu-button" tile color="white" @click="openAddToPlaylist('book', book.id)">Add to playlist</v-btn>
                             <v-btn class="menu-button" tile color="white" @click="showDeleteBookDialog()">Delete</v-btn>
                         </v-menu>
                         <v-btn icon @click.stop="closeBook"><v-icon>mdi-close</v-icon></v-btn>
@@ -150,6 +151,7 @@
                 ></book-chapters>
             </v-card-text>
         </v-card>
+        <add-to-playlist-dialog v-model="addToPlaylistDialog" :item-type="playlistItemType" :item-id="playlistItemId"/>
     </div>
 </template>
 
@@ -166,6 +168,9 @@
                     bookId: -1,
                     chapterId: -1,
                 },
+                addToPlaylistDialog: false,
+                playlistItemType: 'book',
+                playlistItemId: -1,
             }
         },
         props: {
@@ -225,6 +230,11 @@
             },
             closeBook() {
                 this.$emit('close-book');
+            },
+            openAddToPlaylist(itemType, itemId) {
+                this.playlistItemType = itemType;
+                this.playlistItemId = itemId;
+                this.addToPlaylistDialog = true;
             },
             formatNumber: formatNumber
         }

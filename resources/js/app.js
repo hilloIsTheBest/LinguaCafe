@@ -201,6 +201,7 @@ Vue.component('admin-edit-user-dialog', AdminEditUserDialog);
 Vue.component('admin-review-settings', AdminReviewSettings);
 Vue.component('admin-brand-settings', require('./components/Admin/AdminBrandSettings.vue').default);
 Vue.component('admin-oidc-settings', require('./components/Admin/AdminOidcSettings.vue').default);
+Vue.component('admin-ldap-settings', require('./components/Admin/AdminLdapSettings.vue').default);
 
 
 // user manual
@@ -225,6 +226,7 @@ const Home = require('./components/Home/Home.vue').default;
 const PatchNotes = require('./components/Home/PatchNotes.vue').default;
 const Attributions = require('./components/Home/Attributions.vue').default;
 const Library = require('./components/Library/Library.vue').default;
+const Playlists = require('./components/Playlists/Playlists.vue').default;
 const Social = require('./components/Social/Social.vue').default;
 const Games = require('./components/Games/Games.vue').default;
 const TextReader = require('./components/TextReader/TextReader.vue').default;
@@ -246,6 +248,7 @@ const router = new VueRouter({
         { path: '/attributions', component: Attributions },
         { path: '/login', component: LoginForm },
         { path: '/books/:bookId?', component: Library },
+        { path: '/playlists', component: Playlists },
         { path: '/social', component: Social },
         { path: '/games', component: Games },
         { path: '/chapters/read/:chapterId', component: TextReader },
@@ -284,3 +287,6 @@ const app = new Vue({
 });
 
 
+// playlists
+import AddToPlaylistDialog from './components/Playlists/AddToPlaylistDialog.vue';
+Vue.component('add-to-playlist-dialog', AddToPlaylistDialog);

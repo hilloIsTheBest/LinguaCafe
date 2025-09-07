@@ -188,6 +188,15 @@
                                 Review
                             </v-btn>
                             <v-btn
+                                width="160"
+                                class="menu-button"
+                                tile
+                                color="white"
+                                @click="openAddToPlaylist('chapter', item.id)"
+                            >
+                                Add to playlist
+                            </v-btn>
+                            <v-btn
                                 width="100"
                                 class="menu-button"
                                 tile
@@ -212,6 +221,8 @@
             </template>
         </v-data-table>
     </v-container>
+
+    <add-to-playlist-dialog v-model="addToPlaylistDialog" :item-type="playlistItemType" :item-id="playlistItemId"/>
 </template>
 
 <script>
@@ -241,7 +252,10 @@
                     bookName: '',
                     chapterId: -1,
                     chapterName: '',
-                }
+                },
+                addToPlaylistDialog: false,
+                playlistItemType: 'chapter',
+                playlistItemId: -1,
             }
         },
         props: {
@@ -334,7 +348,15 @@
                 this.startReviewDialog.chapterId = chapterId;
                 this.startReviewDialog.active = true;
             },
+            openAddToPlaylist(itemType, itemId) {
+                this.playlistItemType = itemType;
+                this.playlistItemId = itemId;
+                this.addToPlaylistDialog = true;
+            },
             formatNumber: formatNumber
         }
     }
 </script>
+
+<style>
+</style>

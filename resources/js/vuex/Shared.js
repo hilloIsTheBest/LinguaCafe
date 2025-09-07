@@ -9,6 +9,9 @@ export default {
         userEmail: false,
         userAdmin: false,
         oidcEnabled: false,
+        oidcButtonText: 'Login with SSO',
+        oidcButtonIcon: 'mdi-shield-account',
+        oidcAutoLaunch: false,
         vuetifyThemeSettings: null,
         textStylingSettings: null,
         echo: new Echo({
@@ -37,6 +40,15 @@ export default {
         setOidcEnabled (state, enabled) {
             state.oidcEnabled = !!enabled;
         },
+        setOidcButtonText (state, text) {
+            state.oidcButtonText = text || 'Login with SSO';
+        },
+        setOidcButtonIcon (state, icon) {
+            state.oidcButtonIcon = icon || 'mdi-shield-account';
+        },
+        setOidcAutoLaunch (state, enabled) {
+            state.oidcAutoLaunch = !!enabled;
+        },
         setVuetifyThemeSettings (state, vuetifyThemeSettings) {
             state.vuetifyThemeSettings = vuetifyThemeSettings;
         },
@@ -56,6 +68,15 @@ export default {
         },
         oidcEnabled(state) {
             return state.oidcEnabled;
+        },
+        oidcButtonText(state) {
+            return state.oidcButtonText;
+        },
+        oidcButtonIcon(state) {
+            return state.oidcButtonIcon;
+        },
+        oidcAutoLaunch(state) {
+            return state.oidcAutoLaunch;
         }
     }
 }

@@ -16,6 +16,8 @@ class Book extends Model
         'name',
         'cover_image',
         'language',
+        'is_public',
+        'tags',
     ];
 
     function getWordCounts($userId, $words) {

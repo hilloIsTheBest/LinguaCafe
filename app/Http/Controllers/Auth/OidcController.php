@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Setting;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,13 +12,34 @@ use Illuminate\Support\Str;
 
 class OidcController extends Controller
 {
+    protected function getGlobalSetting(string $name, $default = null)
+    {
+        $setting = Setting::where('user_id', -1)->where('name', $name)->first();
+        if ($setting) {
+            return json_decode($setting->value, true);
+        }
+        return $default;
+    }
+
+    protected function isEnabled(): bool
+    {
+        // Prefer DB setting, fall back to config/env
+        $db = $this->getGlobalSetting('oidcEnabled', null);
+        if ($db !== null) {
+            return (bool) $db;
+        }
+        return (bool) config('oidc.enabled');
+    }
+
     protected function makeClient(): \Jumbojett\OpenIDConnectClient
     {
-        $issuer = config('oidc.issuer');
-        $clientId = config('oidc.client_id');
-        $clientSecret = config('oidc.client_secret');
-        $redirectUri = config('oidc.redirect_uri');
-        $scopes = preg_split('/\s+/', (string) config('oidc.scopes', 'openid profile email'));
+        // Prefer DB overrides
+        $issuer = $this->getGlobalSetting('oidcIssuer', config('oidc.issuer'));
+        $clientId = $this->getGlobalSetting('oidcClientId', config('oidc.client_id'));
+        $clientSecret = $this->getGlobalSetting('oidcClientSecret', config('oidc.client_secret'));
+        $redirectUri = $this->getGlobalSetting('oidcRedirectUri', config('oidc.redirect_uri'));
+        $scopesStr = $this->getGlobalSetting('oidcScopes', config('oidc.scopes', 'openid profile email'));
+        $scopes = is_array($scopesStr) ? $scopesStr : preg_split('/\s+/', (string) $scopesStr);
 
         if (!$issuer || !$clientId || !$clientSecret) {
             abort(500, 'OIDC is not configured.');
@@ -28,14 +50,31 @@ class OidcController extends Controller
         $oidc->addScope($scopes);
 
         // Optional tuning
-        $leeway = (int) config('oidc.leeway', 60);
+        $leeway = (int) ($this->getGlobalSetting('oidcLeeway', null) ?? config('oidc.leeway', 60));
         if (method_exists($oidc, 'setLeeway') && $leeway > 0) {
             $oidc->setLeeway($leeway);
         }
 
-        $verifyTls = (bool) config('oidc.verify_tls', true);
+        $verifyTls = (bool) ($this->getGlobalSetting('oidcVerifyTls', null) ?? config('oidc.verify_tls', true));
         if (method_exists($oidc, 'setVerifyPeer')) {
             $oidc->setVerifyPeer($verifyTls);
+        }
+
+        // Optional manual endpoint overrides
+        $authzUrl = $this->getGlobalSetting('oidcAuthorizeUrl', null);
+        $userinfoUrl = $this->getGlobalSetting('oidcUserinfoUrl', null);
+        $jwksUrl = $this->getGlobalSetting('oidcJwksUrl', null);
+        if (method_exists($oidc, 'providerConfigParam')) {
+            $params = [];
+            if (!empty($authzUrl)) $params['authorization_endpoint'] = $authzUrl;
+            if (!empty($userinfoUrl)) $params['userinfo_endpoint'] = $userinfoUrl;
+            if (!empty($jwksUrl)) $params['jwks_uri'] = $jwksUrl;
+            if (!empty($params)) {
+                // Call once per param to stay compatible
+                foreach ($params as $k => $v) {
+                    $oidc->providerConfigParam([$k => $v]);
+                }
+            }
         }
 
         return $oidc;
@@ -44,7 +83,7 @@ class OidcController extends Controller
     // Kick off the OIDC flow (or complete it if returning from the provider)
     public function redirect(Request $request)
     {
-        if (!config('oidc.enabled')) {
+        if (!$this->isEnabled()) {
             abort(404);
         }
 
@@ -59,7 +98,7 @@ class OidcController extends Controller
     // Explicit callback endpoint if you prefer distinct routes
     public function callback(Request $request)
     {
-        if (!config('oidc.enabled')) {
+        if (!$this->isEnabled()) {
             abort(404);
         }
 
@@ -98,10 +137,14 @@ class OidcController extends Controller
             abort(422, 'OIDC: email claim is required but missing.');
         }
 
-        // Find or create the local user
+        // Find (or create if auto-register enabled) the local user
         $user = User::where('email', $email)->first();
 
+        $autoRegister = $this->getGlobalSetting('oidcAutoRegister', true) !== false; // default on
         if (!$user) {
+            if (!$autoRegister) {
+                abort(403, 'OIDC: account not registered.');
+            }
             $userCount = User::count();
             $isAdmin = $userCount === 0; // first local user becomes admin (existing app behavior)
             $password = Str::random(40); // not used for OIDC users
@@ -111,6 +154,46 @@ class OidcController extends Controller
             $userService->createUser($name ?: ($email), $email, $password, $isAdmin, true);
 
             $user = User::where('email', $email)->first();
+        }
+
+        // Optional claims-based admin mapping
+        try {
+            $groupClaimName = (string) ($this->getGlobalSetting('oidcGroupClaim', '') ?: '');
+            $permClaimName = (string) ($this->getGlobalSetting('oidcPermissionClaim', '') ?: '');
+            $adminGroup = (string) ($this->getGlobalSetting('oidcAdminGroup', '') ?: '');
+            $adminPerm = (string) ($this->getGlobalSetting('oidcAdminPermission', '') ?: '');
+
+            $allClaims = [];
+            if (method_exists($oidc, 'getVerifiedClaims')) {
+                $v = $oidc->getVerifiedClaims();
+                if (is_array($v)) $allClaims = $v;
+            }
+            if (!$allClaims && method_exists($oidc, 'getAccessTokenPayload')) {
+                $p = $oidc->getAccessTokenPayload();
+                if (is_array($p)) $allClaims = array_merge($allClaims, $p);
+            }
+            // Try userinfo for claims as well
+            if (!$allClaims && method_exists($oidc, 'requestUserInfo')) {
+                // no-op here unless needed
+            }
+
+            $makeAdmin = false;
+            if ($adminGroup && $groupClaimName && isset($allClaims[$groupClaimName])) {
+                $val = $allClaims[$groupClaimName];
+                if (is_string($val)) $makeAdmin = str_contains($val, $adminGroup);
+                if (is_array($val)) $makeAdmin = in_array($adminGroup, $val, true);
+            }
+            if (!$makeAdmin && $adminPerm && $permClaimName && isset($allClaims[$permClaimName])) {
+                $val = $allClaims[$permClaimName];
+                if (is_string($val)) $makeAdmin = str_contains($val, $adminPerm);
+                if (is_array($val)) $makeAdmin = in_array($adminPerm, $val, true);
+            }
+            if ($makeAdmin && !$user->is_admin) {
+                $user->is_admin = true;
+                $user->save();
+            }
+        } catch (\Throwable $e) {
+            // ignore mapping errors to avoid blocking login
         }
 
         // Log the user into the Laravel session

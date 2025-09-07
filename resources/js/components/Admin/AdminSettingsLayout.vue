@@ -9,6 +9,7 @@
             <v-tab>Branding</v-tab>
             <v-tab>API</v-tab>
             <v-tab>OIDC</v-tab>
+            <v-tab>LDAP</v-tab>
             <v-tab>Reviews</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab" id="admin-tab-items" elevation="0" class="no-background rounded-lg mt-4 pa-6">
@@ -37,6 +38,9 @@
                 <admin-oidc-settings></admin-oidc-settings>
             </v-tab-item>
             <v-tab-item :value="8">
+                <admin-ldap-settings></admin-ldap-settings>
+            </v-tab-item>
+            <v-tab-item :value="9">
                 <admin-review-settings></admin-review-settings>
             </v-tab-item>
         </v-tabs-items>
@@ -61,7 +65,8 @@
                     'branding': 5,
                     'api': 6,
                     'oidc': 7,
-                    'reviews': 8,
+                    'ldap': 8,
+                    'reviews': 9,
                 },
                 tabUrls: [
                     'dashboard',
@@ -72,6 +77,7 @@
                     'branding',
                     'api',
                     'oidc',
+                    'ldap',
                     'reviews',
                 ]
             }

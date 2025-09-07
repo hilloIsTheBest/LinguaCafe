@@ -136,6 +136,12 @@
                         bottomNav: true,
                     },
                     {
+                        name: 'Playlists',
+                        url: '/playlists',
+                        icon: 'mdi-playlist-music',
+                        bottomNav: false,
+                    },
+                    {
                         name: 'Vocabulary',
                         url: '/vocabulary/search',
                         icon: 'mdi-translate',
@@ -207,6 +213,18 @@
                 type: Boolean,
                 default: false,
             },
+            _oidcButtonText: {
+                type: String,
+                default: 'Login with SSO',
+            },
+            _oidcButtonIcon: {
+                type: String,
+                default: 'mdi-shield-account',
+            },
+            _oidcAutoLaunch: {
+                type: Boolean,
+                default: false,
+            },
             themeSettings: {
                 type: Object,
                 default: null,
@@ -219,6 +237,9 @@
             this.$store.commit('shared/setUserEmail', this.$props._userEmail);
             this.$store.commit('shared/setUserAdmin', this.$props._isAdmin);
             this.$store.commit('shared/setOidcEnabled', this.$props._oidcEnabled);
+            this.$store.commit('shared/setOidcButtonText', this.$props._oidcButtonText);
+            this.$store.commit('shared/setOidcButtonIcon', this.$props._oidcButtonIcon);
+            this.$store.commit('shared/setOidcAutoLaunch', this.$props._oidcAutoLaunch);
 
             if (this.$props._selectedLanguage == 'japanese') {
                 this.navigation.splice(3, 0, {

@@ -73,7 +73,7 @@
                             </div>
                         </div>
                     </template>
-                    
+
                     <v-alert
                         class="my-3" 
                         border="left"
@@ -91,6 +91,23 @@
                     >
                         Chapter has been saved successfully.
                     </v-alert>
+
+                    <v-divider class="my-4"></v-divider>
+
+                    <v-switch v-model="isPublic" label="Publish to LinguaCafe public library"></v-switch>
+
+                    <label class="font-weight-bold">Tags</label>
+                    <v-combobox
+                        v-model="tags"
+                        multiple
+                        chips
+                        clearable
+                        small-chips
+                        filled
+                        dense
+                        rounded
+                        placeholder="Add tags and press enter"
+                    ></v-combobox>
                 </v-form>
             </v-card-text>
 
@@ -124,6 +141,8 @@
                 name: this.$props.bookName,
                 image: null,
                 editImage: false,
+                isPublic: false,
+                tags: [],
 
                 rules: {
                     name: (value) => {
@@ -152,6 +171,13 @@
 
             if (this.$props.bookName.length) {
                 this.validateForm();
+            }
+            if (this.$props.bookId !== -1) {
+                axios.get('/books/details/' + this.$props.bookId).then((r) => {
+                    const d = r.data || {};
+                    this.isPublic = !!d.is_public;
+                    this.tags = Array.isArray(d.tags) ? d.tags : [];
+                }).catch(()=>{});
             }
         },
         methods: {
@@ -187,6 +213,8 @@
                 var url = '/books/update';
                 var form = new FormData();
                 form.set('bookName',this.name);
+                form.set('isPublic', this.isPublic ? '1' : '0');
+                form.set('tags', JSON.stringify(this.tags || []));
                 
                 if (this.$props.bookId === -1) {
                     url = '/books/create';
@@ -214,7 +242,7 @@
                         this.saveResult = 'error';
                     }
                 });
-            },
+        },
             close() {
                 this.$emit('input', false);
             }

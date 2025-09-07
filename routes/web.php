@@ -187,9 +187,18 @@ Route::group(['middleware' => ['auth', 'auth.session', 'web']], function () {
 
     // books
     Route::post('/books', [App\Http\Controllers\BookController::class, 'getBooks']);
+    Route::get ('/books/details/{bookId}', [App\Http\Controllers\BookController::class, 'getBookDetails']);
     Route::get ('/books/get-word-counts/{bookId}', [App\Http\Controllers\BookController::class, 'getBookWordCounts']);
     Route::post('/books/create', [App\Http\Controllers\BookController::class, 'createBook']);
     Route::post('/books/update', [App\Http\Controllers\BookController::class, 'updateBook']);
+
+    // playlists
+    Route::get('/playlists', [App\Http\Controllers\PlaylistController::class, 'listPlaylists']);
+    Route::post('/playlists/create', [App\Http\Controllers\PlaylistController::class, 'createPlaylist']);
+    Route::post('/playlists/delete/{playlistId}', [App\Http\Controllers\PlaylistController::class, 'deletePlaylist']);
+    Route::get('/playlists/items/{playlistId}', [App\Http\Controllers\PlaylistController::class, 'listItems']);
+    Route::post('/playlists/items/add', [App\Http\Controllers\PlaylistController::class, 'addItem']);
+    Route::post('/playlists/items/remove', [App\Http\Controllers\PlaylistController::class, 'removeItem']);
     Route::post('/books/delete', [App\Http\Controllers\BookController::class, 'deleteBook']);
 
     // chapters

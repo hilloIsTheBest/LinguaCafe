@@ -116,8 +116,8 @@
                     class="mr-3"
                     @click="loginWithSso"
                 >
-                    <v-icon class="mr-2">mdi-shield-account</v-icon>
-                    Login with SSO
+                    <v-icon class="mr-2">{{$store.getters['shared/oidcButtonIcon']}}</v-icon>
+                    {{$store.getters['shared/oidcButtonText']}}
                 </v-btn>
                 <v-btn
                     color="primary" 
@@ -166,6 +166,12 @@
             };
         },
         mounted: function() {
+            // Auto-launch OIDC if enabled
+            try {
+                if (this.$store.getters['shared/oidcEnabled'] && this.$store.getters['shared/oidcAutoLaunch']) {
+                    this.loginWithSso();
+                }
+            } catch(e) {}
         },
         methods: {
             addUserDialogSaved() {
