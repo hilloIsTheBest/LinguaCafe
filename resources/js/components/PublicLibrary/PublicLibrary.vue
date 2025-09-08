@@ -18,13 +18,7 @@
               <v-card-text>
                 <v-chip v-for="t in b.tags" :key="t" small class="mr-1 mb-1">{{t}}</v-chip>
               </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn text rounded :to="'/books/'+b.id">
-                  <v-icon class="mr-1">mdi-book-open-variant</v-icon>
-                  View
-                </v-btn>
-              </v-card-actions>
+              <!-- Reserved for future actions (e.g., copy to library) -->
             </v-card>
           </v-col>
         </v-row>
@@ -59,4 +53,3 @@ export default {
   mounted() { axios.get('/public/books').then(r => { this.books = r.data||[]; }); }
 }
 </script>
-
