@@ -199,6 +199,10 @@ Route::group(['middleware' => ['auth', 'auth.session', 'web']], function () {
     Route::get('/playlists/items/{playlistId}', [App\Http\Controllers\PlaylistController::class, 'listItems']);
     Route::post('/playlists/items/add', [App\Http\Controllers\PlaylistController::class, 'addItem']);
     Route::post('/playlists/items/remove', [App\Http\Controllers\PlaylistController::class, 'removeItem']);
+    Route::post('/playlists/items/move', [App\Http\Controllers\PlaylistController::class, 'moveItem']);
+
+    // public library
+    Route::get('/public/books', [App\Http\Controllers\PublicLibraryController::class, 'listPublicBooks']);
     Route::post('/books/delete', [App\Http\Controllers\BookController::class, 'deleteBook']);
 
     // chapters

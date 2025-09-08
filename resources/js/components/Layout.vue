@@ -136,6 +136,12 @@
                         bottomNav: true,
                     },
                     {
+                        name: 'Public library',
+                        url: '/library/public',
+                        icon: 'mdi-earth',
+                        bottomNav: false,
+                    },
+                    {
                         name: 'Playlists',
                         url: '/playlists',
                         icon: 'mdi-playlist-music',

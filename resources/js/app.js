@@ -226,7 +226,9 @@ const Home = require('./components/Home/Home.vue').default;
 const PatchNotes = require('./components/Home/PatchNotes.vue').default;
 const Attributions = require('./components/Home/Attributions.vue').default;
 const Library = require('./components/Library/Library.vue').default;
+const PublicLibrary = require('./components/PublicLibrary/PublicLibrary.vue').default;
 const Playlists = require('./components/Playlists/Playlists.vue').default;
+const PlaylistDetail = require('./components/Playlists/PlaylistDetail.vue').default;
 const Social = require('./components/Social/Social.vue').default;
 const Games = require('./components/Games/Games.vue').default;
 const TextReader = require('./components/TextReader/TextReader.vue').default;
@@ -248,7 +250,9 @@ const router = new VueRouter({
         { path: '/attributions', component: Attributions },
         { path: '/login', component: LoginForm },
         { path: '/books/:bookId?', component: Library },
+        { path: '/library/public', component: PublicLibrary },
         { path: '/playlists', component: Playlists },
+        { path: '/playlists/:playlistId', component: PlaylistDetail },
         { path: '/social', component: Social },
         { path: '/games', component: Games },
         { path: '/chapters/read/:chapterId', component: TextReader },
