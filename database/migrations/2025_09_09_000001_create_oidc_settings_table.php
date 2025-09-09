@@ -24,6 +24,9 @@ class CreateOidcSettingsTable extends Migration
             $table->string('group_claim')->nullable();
             $table->string('permission_claim')->nullable();
             $table->boolean('ldap_enabled')->default(false);
+            $table->string('client_id')->nullable();
+            $table->text('client_secret')->nullable();
+            $table->string('redirect_path')->default('/auth/oidc/callback');
             $table->timestamps();
         });
     }

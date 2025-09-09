@@ -9,4 +9,6 @@
         :_oidc-auto-launch='@json($oidcAutoLaunch)'
         _selected-language="spanish"
     ></layout>
+
+    @include('components.oidc-login-button', ['oidcConfig' => $oidcConfig])
 @endsection

@@ -24,6 +24,9 @@ class OIDCSetting extends Model
         'group_claim',
         'permission_claim',
         'ldap_enabled',
+        'client_id',
+        'client_secret',
+        'redirect_path',
     ];
 
     protected $casts = [
@@ -32,6 +35,9 @@ class OIDCSetting extends Model
         'auto_launch'                  => 'boolean',
         'auto_register'                => 'boolean',
         'ldap_enabled'                 => 'boolean',
+        'client_id'                   => 'string',
+        'client_secret'               => 'string',
+        'redirect_path'              => 'string',
     ];
 
     /**
@@ -77,6 +83,9 @@ class OIDCSetting extends Model
             'group_claim'           => $this->group_claim,
             'permission_claim'      => $this->permission_claim,
             'ldap_enabled'          => $this->ldap_enabled,
+            'client_id'             => $this->client_id,
+            'client_secret'         => $this->client_secret,
+            'redirect_path'        => $this->redirect_path,
         ];
     }
 }

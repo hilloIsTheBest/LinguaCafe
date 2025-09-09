@@ -8,9 +8,7 @@ use App\Http\Controllers\PlaylistController;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| Here is where you can register web routes for your application.
 |
 */
 
@@ -24,14 +22,23 @@ Route::resource('playlists', PlaylistController::class)->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
-| Removed conflicting routes:
+| OIDC Routes
 |--------------------------------------------------------------------------
 |
-| The following custom routes were removed to avoid conflicts with the
-| resourceful controller:
-|
-| Route::get('/listPlaylists', [PlaylistController::class, 'index']);
-| Route::post('/addItem', [PlaylistController::class, 'store']);
-| ... (any other non‑resource routes)
+| These routes handle the OpenID Connect flow.
 |
 */
+Route::get('/auth/oidc/redirect', [OAuthController::class, 'redirect'])->name('oidc.redirect');
+Route::get('/auth/oidc/callback', [OAuthController::class, 'callback'])->name('oidc.callback');
+
+/*
+|--------------------------------------------------------------------------
+| Admin OIDC Settings
+|--------------------------------------------------------------------------
+|
+| Routes for editing and updating OIDC settings.
+|
+*/
+Route::get('/admin/oidc/edit', [OIDCController::class, 'edit']);
+Route::post('/admin/oidc/update', [OIDCController::class, 'update']);
+

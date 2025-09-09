@@ -31,6 +31,9 @@ class OIDCController extends Controller
             'group_claim'               => 'nullable|string',
             'permission_claim'          => 'nullable|string',
             'ldap_enabled'              => 'boolean',
+            'client_id'                => 'nullable|string',
+            'client_secret'            => 'nullable|string',
+            'redirect_path'           => 'nullable|string',
         ]);
 
         $oidc = OIDCSetting::get();
