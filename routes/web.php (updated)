@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\OIDCController;
+use App\Http\Controllers\OAuthController;
+
+// Existing routes...
+
+Route::prefix('admin')->middleware(['auth', 'can:manage-settings'])->group(function () {
+    Route::get('/oidc', [OIDCController::class, 'edit'])->name('admin.oidc.edit');
+    Route::put('/oidc', [OIDCController::class, 'update'])->name('admin.oidc.update');
+});
+
+Route::get('/oauth/callback', [OAuthController::class, 'callback'])->name('oauth.callback');
+
+// Playlist routes (if not already defined)
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/playlists', [App\Http\Controllers\PlaylistController::class, 'listPlaylists']);
+    Route::post('/playlists/create', [App\Http\Controllers\PlaylistController::class, 'createPlaylist']);
+    Route::post('/playlists/delete/{playlistId}', [App\Http\Controllers\PlaylistController::class, 'deletePlaylist']);
+    Route::get('/playlists/items/{playlistId}', [App\Http\Controllers\PlaylistController::class, 'listItems']);
+    Route::post('/playlists/items/add', [App\Http\Controllers\PlaylistController::class, 'addItem']);
+    Route::post('/playlists/items/remove', [App\Http\Controllers\PlaylistController::class, 'removeItem']);
+    Route::post('/playlists/items/move', [App\Http\Controllers\PlaylistController::class, 'moveItem']);
+    Route::get('/playlists/items/next', [App\Http\Controllers\PlaylistController::class, 'nextItem']);
+});
