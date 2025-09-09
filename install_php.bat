@@ -1,4 +1,3 @@
-// Updated install_php.bat script to handle potential failures and provide guidance.
 @echo off
 :: Check if Chocolatey is installed
 choco -v >nul 2>&1 || (
