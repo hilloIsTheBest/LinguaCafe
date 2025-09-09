@@ -294,3 +294,10 @@ const app = new Vue({
 // playlists
 import AddToPlaylistDialog from './components/Playlists/AddToPlaylistDialog.vue';
 Vue.component('add-to-playlist-dialog', AddToPlaylistDialog);
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
