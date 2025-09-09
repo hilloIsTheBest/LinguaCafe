@@ -42,3 +42,4 @@ Route::get('/auth/oidc/callback', [OAuthController::class, 'callback'])->name('o
 Route::get('/admin/oidc/edit', [OIDCController::class, 'edit']);
 Route::post('/admin/oidc/update', [OIDCController::class, 'update']);
 
+Route::get('/auth/oidc/logout', [OAuthController::class, 'logout'])->name('oidc.logout');

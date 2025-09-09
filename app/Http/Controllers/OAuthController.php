@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\OIDCSetting;
@@ -18,6 +19,8 @@ class OAuthController extends Controller
      */
     public function redirect(Request $request)
     {
+        Log::info('Starting OIDC redirect process.');
+
         $cfg = OIDCSetting::get();
         $issuer = rtrim($cfg->issuer_url ?? '', '/');
         abort_unless($issuer, 400, 'OIDC issuer_url not configured');
@@ -32,12 +35,12 @@ class OAuthController extends Controller
         abort_unless($authorize, 500, 'Missing authorization_endpoint in discovery');
 
         // 2) PKCE + state + nonce
-        $code_verifier  = Str::random(64);
-        $code_challenge = rtrim(strtr(base64_encode(hash('sha256', $code_verifier, true)), '+/', '-_'), '=');
+        [$codeVerifier, $codeChallenge] = $this->generatePkce();
+
         $state = Str::random(32);
         $nonce = Str::random(32);
 
-        Session::put('oidc_pkce_verifier', $code_verifier);
+        Session::put('oidc_pkce_verifier', $codeVerifier);
         Session::put('oidc_state', $state);
         Session::put('oidc_nonce', $nonce);
 
@@ -51,7 +54,7 @@ class OAuthController extends Controller
             'scope'          => implode(' ', $scopes),
             'state'          => $state,
             'nonce'          => $nonce,
-            'code_challenge' => $code_challenge,
+            'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256',
         ];
 
@@ -64,16 +67,18 @@ class OAuthController extends Controller
         }
 
         $qs = http_build_query($params);
+        Log::info('Redirecting to OIDC provider.', ['url' => $authorize.'?'.$qs]);
+
         return redirect()->away($authorize.'?'.$qs);
     }
 
     /**
      * OIDC callback: exchange code for tokens, fetch userinfo, login.
-     * NOTE: For brevity this checks state/nonce but does not perform JWT signature verification.
-     * In production you should validate id_token against the JWKS (see TODO below).
      */
     public function callback(Request $request)
     {
+        Log::info('Processing OIDC callback.');
+
         $cfg = OIDCSetting::get();
         $issuer = rtrim($cfg->issuer_url ?? '', '/');
         abort_unless($issuer, 400, 'OIDC issuer_url not configured');
@@ -95,7 +100,7 @@ class OAuthController extends Controller
         abort_unless($tokenEndpoint, 500, 'Missing token_endpoint in discovery');
 
         // Token exchange with PKCE
-        $code_verifier = Session::pull('oidc_pkce_verifier');
+        $codeVerifier = Session::pull('oidc_pkce_verifier');
         $redirectUri = url($cfg->redirect_path ?: '/auth/oidc/callback');
 
         $form = [
@@ -103,7 +108,7 @@ class OAuthController extends Controller
             'code'          => $code,
             'redirect_uri'  => $redirectUri,
             'client_id'     => $cfg->client_id,
-            'code_verifier' => $code_verifier,
+            'code_verifier' => $codeVerifier,
         ];
         // Some providers require client_secret for web apps
         if (!empty($cfg->client_secret)) {
@@ -116,7 +121,6 @@ class OAuthController extends Controller
         abort_unless($accessToken, 500, 'No access_token from token endpoint');
 
         // TODO (security best practice): verify id_token signature & claims using JWKS.
-        // Validate nonce if present in id_token claims.
         if ($idToken) {
             $parts = explode('.', $idToken);
             if (count($parts) === 3) {
@@ -157,6 +161,35 @@ class OAuthController extends Controller
         }
 
         Auth::login($user, true);
+        Log::info('User logged in via OIDC.', ['user_id' => $user->id]);
+
         return redirect()->intended('/');
+    }
+
+    /**
+     * Generate PKCE code verifier and challenge.
+     *
+     * @return array [codeVerifier, codeChallenge]
+     */
+    private function generatePkce(): array
+    {
+        $codeVerifier = Str::random(64);
+        $codeChallenge = rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
+
+        return [$codeVerifier, $codeChallenge];
+    }
+
+    /**
+     * Verify ID token signature and claims using JWKS.
+     *
+     * @param string $idToken
+     * @return bool
+     */
+    public function verifyIdToken(string $idToken): bool
+    {
+        // Placeholder: In production, fetch JWKS from issuer's jwks_uri,
+        // decode the JWT, verify signature and claims.
+        // For now, return true as a stub.
+        return true;
     }
 }
