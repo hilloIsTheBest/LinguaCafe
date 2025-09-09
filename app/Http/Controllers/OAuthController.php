@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\OIDCSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Controller; // Added missing import
 
 class OAuthController extends Controller
 {
