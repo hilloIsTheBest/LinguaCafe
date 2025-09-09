@@ -66,7 +66,7 @@ export default {
     },
     open(it) {
       if (it.item_type === 'chapter') {
-        this.$router.push('/chapters/read/'+it.item_id);
+        this.$router.push({ path: '/chapters/read/'+it.item_id, query: { playlistId: this.playlistId } });
       } else {
         this.$router.push('/books/'+it.item_id);
       }
@@ -82,4 +82,3 @@ export default {
   }
 }
 </script>
-

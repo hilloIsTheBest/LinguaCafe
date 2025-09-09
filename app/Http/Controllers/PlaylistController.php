@@ -107,5 +107,25 @@ class PlaylistController extends Controller
         $neighbor->save();
         return response()->json('ok', 200);
     }
+
+    public function nextItem(Request $request)
+    {
+        $userId = Auth::id();
+        $playlistId = (int) $request->query('playlistId');
+        $itemType = (string) $request->query('itemType');
+        $itemId = (int) $request->query('itemId');
+        $cur = PlaylistItem::where('user_id', $userId)
+            ->where('playlist_id', $playlistId)
+            ->where('item_type', $itemType)
+            ->where('item_id', $itemId)
+            ->first();
+        if (!$cur) return response()->json(null, 200);
+        $n = PlaylistItem::where('user_id', $userId)
+            ->where('playlist_id', $playlistId)
+            ->where('position', '>', $cur->position)
+            ->orderBy('position', 'asc')
+            ->first();
+        return response()->json($n, 200);
+    }
 }
 

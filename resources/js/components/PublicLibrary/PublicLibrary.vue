@@ -18,7 +18,13 @@
               <v-card-text>
                 <v-chip v-for="t in b.tags" :key="t" small class="mr-1 mb-1">{{t}}</v-chip>
               </v-card-text>
-              <!-- Reserved for future actions (e.g., copy to library) -->
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" rounded depressed @click="copy(b)">
+                  <v-icon class="mr-1">mdi-content-copy</v-icon>
+                  Copy to my library
+                </v-btn>
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
@@ -33,6 +39,8 @@ export default {
     books: [],
     q: '',
     lang: null,
+    error: '',
+    success: '',
   }),
   computed: {
     languages() {
@@ -50,6 +58,15 @@ export default {
       });
     }
   },
-  mounted() { axios.get('/public/books').then(r => { this.books = r.data||[]; }); }
+  mounted() { axios.get('/public/books').then(r => { this.books = r.data||[]; }); },
+  methods: {
+    copy(b) {
+      this.error=''; this.success='';
+      axios.post('/public/books/copy/'+b.id).then(r => {
+        this.success = 'Copied! Open your library to see it.';
+        this.$vuetify.goTo(0);
+      }).catch(e => { this.error = (e&&e.response&&e.response.data) || 'Error copying book';});
+    }
+  }
 }
 </script>
