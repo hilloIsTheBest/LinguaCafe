@@ -1,0 +1,33 @@
+<template>
+  <v-container>
+    <!-- list of playlist items -->
+  </v-container>
+</template>
+
+<script>
+export default {
+  data() { return { playlists: [] } },
+  methods: { loadPlaylists() { /* fetch from API */ }, addPlaylist() { /* POST */ } }
+};
+</script>
+
+<template>
+  <v-container>
+    <!-- list of playlist items -->
+  </v-container>
+</template>
+
+<script>
+export default {
+  data() { return { playlists: [] } },
+  methods: { loadPlaylists() { /* fetch from API */ }, addPlaylist() { /* POST */ } }
+};
+</script>
+
+if (config('oidc.enabled')) {
+    Route::group(['middleware' => ['web']], function () {
+        Route::get('/auth/oidc', [App\Http\Controllers\Auth\OidcController::class, 'redirect'])->name('oidc.login');
+        Route::get('/auth/oidc/callback', [App\Http\Controllers\Auth\OidcController::class, 'callback'])->name('oidc.callback');
+    });
+}
+
