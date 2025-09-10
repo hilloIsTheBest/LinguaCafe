@@ -90,4 +90,48 @@ class OAuthController extends Controller
         abort_unless($state === Session::pull('oidc_state'), 400, 'Invalid state');
 
         // Discovery
-        $disco = Cache::
+        $disco = Cache::remember('oidc_disco', 600, function () use ($issuer) {
+            $url = $issuer.'/.well-known/openid-configuration';
+            $res = Http::timeout(10)->get($url)->throw();
+            return $res->json();
+        });
+        $tokenEndpoint   = $disco['token_endpoint'] ?? null;
+        $userinfoEndpoint= $disco['userinfo_endpoint'] ?? null;
+        abort_unless($tokenEndpoint, 500, 'Missing token_endpoint in discovery');
+
+        // Token exchange with PKCE
+        $codeVerifier = Session::pull('oidc_pkce_verifier');
+        $redirectUri = url($cfg->redirect_path ?: '/auth/oidc/callback');
+
+        $form = [
+            'grant_type'    => 'authorization_code',
+            'code'          => $code,
+            'redirect_uri'  => $redirectUri,
+            'client_id'     => $cfg->client_id,
+            'code_verifier' => $codeVerifier,
+        ];
+        // Some providers require client_secret for web apps
+        if (!empty($cfg->client_secret)) {
+            $form['client_secret'] = $cfg->client_secret;
+        }
+
+        $tokenRes = Http::asForm()->timeout(10)->post($tokenEndpoint, $form)->throw()->json();
+        $accessToken = $tokenRes['access_token'] ?? null;
+        $idToken     = $tokenRes['id_token']     ?? null;
+        abort_unless($accessToken, 500, 'No access_token from token endpoint');
+
+        // TODO (security best practice): verify id_token signature & claims using JWKS.
+        if ($idToken) {
+            $parts = explode('.', $idToken);
+            if (count($parts) === 3) {
+                $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+                $nonce = $payload['nonce'] ?? null;
+                abort_unless($nonce === Session::pull('oidc_nonce'), 400, 'Invalid nonce');
+            }
+        }
+
+        // Userinfo
+        $email = null;
+        $name  = null;
+        if ($userinfoEndpoint) {
+            $ui = Http::withToken($
