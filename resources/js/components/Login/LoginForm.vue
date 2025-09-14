@@ -20,6 +20,9 @@
             <v-card-title>
                 <v-icon class="mr-2">mdi-account</v-icon>Login
                 <v-spacer />
+                <v-btn rounded depressed class="mr-2" v-if="canInstall" @click="installApp">
+                    <v-icon class="mr-2">mdi-download</v-icon> Install
+                </v-btn>
                 <v-btn rounded depressed @click="themeSelectionDialog = true;">
                     <v-icon class="mr-2">mdi-weather-sunny</v-icon> / <v-icon class="ml-2">mdi-weather-night</v-icon>
                 </v-btn>
@@ -148,6 +151,7 @@
                 password: '',
                 error: '',
                 loading: false,
+                canInstall: false,
                 
 
                 rules: {
@@ -171,6 +175,13 @@
                 if (this.$store.getters['shared/oidcEnabled'] && this.$store.getters['shared/oidcAutoLaunch']) {
                     this.loginWithSso();
                 }
+            } catch(e) {}
+
+            try {
+                this.canInstall = !!window.deferredPWAInstallPrompt;
+                window.addEventListener('beforeinstallprompt', () => {
+                    this.canInstall = !!window.deferredPWAInstallPrompt;
+                });
             } catch(e) {}
         },
         methods: {
@@ -202,6 +213,16 @@
                     this.error = 'Invalid email or password';
                     this.loading = false;
                 });
+            },
+            installApp() {
+                try {
+                    if (window.deferredPWAInstallPrompt) {
+                        const p = window.deferredPWAInstallPrompt; 
+                        window.deferredPWAInstallPrompt = null;
+                        p.prompt();
+                        p.userChoice.finally(() => { this.canInstall = false; });
+                    }
+                } catch(e) {}
             },
             updateTheme() {
                 window.location.href = "/";
