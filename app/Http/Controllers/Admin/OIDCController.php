@@ -50,4 +50,58 @@ class OIDCController extends Controller
 
         return redirect()->route('admin.oidc.edit')->with('status', 'OIDC settings updated successfully.');
     }
+
+    // Lightweight diagnostics to verify server-side OIDC config and discovery
+    public function health(\Illuminate\Http\Request $request)
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || !$user->is_admin) {
+            abort(403);
+        }
+
+        // Pull settings from global settings store (not from OIDCSetting model)
+        $get = function(string $name, $default = null) {
+            $s = \App\Models\Setting::where('user_id', -1)->where('name', $name)->first();
+            return $s ? json_decode($s->value, true) : $default;
+        };
+
+        $issuer = (string) $get('oidcIssuer', '');
+        $clientId = (string) $get('oidcClientId', '');
+        $redirect = (string) $get('oidcRedirectUri', '');
+        $enabled = (bool) $get('oidcEnabled', false);
+
+        $discovery = null; $error = null;
+        if ($issuer) {
+            try {
+                $url = rtrim($issuer, '/').'/.well-known/openid-configuration';
+                $res = \Illuminate\Support\Facades\Http::timeout(10)->get($url);
+                if ($res->ok()) {
+                    $discovery = $res->json();
+                } else {
+                    $error = 'Discovery HTTP '.$res->status();
+                }
+            } catch (\Throwable $e) {
+                $error = $e->getMessage();
+            }
+        } else {
+            $error = 'Missing issuer';
+        }
+
+        return response()->json([
+            'enabled' => $enabled,
+            'issuer' => $issuer,
+            'clientId' => $clientId !== '' ? '[set]' : '[missing]',
+            'redirectUri' => $redirect,
+            'expectedCallback' => url('/auth/oidc/callback'),
+            'redirectMatchesExpected' => $redirect === url('/auth/oidc/callback'),
+            'discovery' => $discovery ? [
+                'authorization_endpoint' => $discovery['authorization_endpoint'] ?? null,
+                'token_endpoint' => $discovery['token_endpoint'] ?? null,
+                'userinfo_endpoint' => $discovery['userinfo_endpoint'] ?? null,
+                'jwks_uri' => $discovery['jwks_uri'] ?? null,
+                'issuer' => $discovery['issuer'] ?? null,
+            ] : null,
+            'error' => $error,
+        ], 200);
+    }
 }

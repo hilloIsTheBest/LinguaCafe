@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\Admin\OIDCController as AdminOIDCController;
 use App\Http\Controllers\PublicLibraryController;
 use App\Http\Controllers\BookController;
 
@@ -53,6 +54,9 @@ Route::post('/settings/branding/upload-icon', [SettingsController::class, 'uploa
 Route::get('/auth/oidc', [OidcController::class, 'redirect'])->name('oidc.redirect');
 Route::get('/auth/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
 Route::get('/auth/oidc/logout', [OidcController::class, 'logout'])->name('oidc.logout');
+
+// Admin OIDC health diagnostics (JSON)
+Route::get('/admin/oidc/health', [AdminOIDCController::class, 'health'])->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
