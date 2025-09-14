@@ -8,6 +8,8 @@ export default {
         userName: false,
         userEmail: false,
         userAdmin: false,
+        mobileUiStyle: 'default', // 'default' | 'lingq'
+        mobileOnboardingEnabled: false,
         oidcEnabled: false,
         oidcButtonText: 'Login with SSO',
         oidcButtonIcon: 'mdi-shield-account',
@@ -37,6 +39,12 @@ export default {
         setUserAdmin (state, userAdmin) {
             state.userAdmin = userAdmin;
         },
+        setMobileUiStyle (state, style) {
+            state.mobileUiStyle = style || 'default';
+        },
+        setMobileOnboardingEnabled (state, enabled) {
+            state.mobileOnboardingEnabled = !!enabled;
+        },
         setOidcEnabled (state, enabled) {
             state.oidcEnabled = !!enabled;
         },
@@ -65,6 +73,12 @@ export default {
         },
         userAdmin(state) {
             return state.userAdmin;
+        },
+        mobileUiStyle(state) {
+            return state.mobileUiStyle;
+        },
+        mobileOnboardingEnabled(state) {
+            return state.mobileOnboardingEnabled;
         },
         oidcEnabled(state) {
             return state.oidcEnabled;

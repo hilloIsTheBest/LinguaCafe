@@ -4,6 +4,10 @@
         <!-- Dialogs -->
         <start-review-dialog v-model="startReviewDialog" />
         <logout-dialog v-model="logoutDialog"/>
+        <onboarding-modal v-if="$store.getters['shared/mobileOnboardingEnabled']"
+                          v-model="onboardingDialog"
+                          :default-language="selectedLanguage"
+                          @completed="onboardingCompleted"/>
 
         <template v-if="$router.currentRoute.path !== '/login'">
             <theme-selection-dialog v-model="themeSelectionDialog" @input="updateTheme"></theme-selection-dialog>
@@ -79,21 +83,41 @@
 
             <!-- Bottom navigation -->
             <v-bottom-navigation dense grow shift class="d-flex d-sm-flex d-md-none" dark background-color="primary">
-                <v-btn class="text-decoration-none" width="60" style="float: left;" @click="drawer = true;">
-                    <span>More</span>
-                    <v-icon>mdi-menu</v-icon>
-                </v-btn><v-spacer></v-spacer>
-                <v-btn
-                    class="text-decoration-none"
-                    grow
-                    v-for="(item, index) in navigation"
-                    :key="index"
-                    :to="item.url"
-                    v-if="item.bottomNav"
-                >
-                    <span>{{ item.name }}</span>
-                    <v-icon>{{ item.icon }}</v-icon>
-                </v-btn>
+                <template v-if="$store.getters['shared/mobileUiStyle'] === 'lingq'">
+                    <v-btn class="text-decoration-none" width="60" :to="'/books'">
+                        <v-icon>mdi-bank</v-icon>
+                        <span>Library</span>
+                    </v-btn>
+                    <v-btn class="text-decoration-none" width="60" :to="'/vocabulary'">
+                        <v-icon>mdi-alphabetical-variant</v-icon>
+                        <span>Vocabulary</span>
+                    </v-btn>
+                    <v-btn class="text-decoration-none" width="60" :to="'/playlists'">
+                        <v-icon>mdi-playlist-music</v-icon>
+                        <span>Playlist</span>
+                    </v-btn>
+                    <v-btn class="text-decoration-none" width="60" @click="drawer = true;">
+                        <v-icon>mdi-dots-horizontal</v-icon>
+                        <span>More</span>
+                    </v-btn>
+                </template>
+                <template v-else>
+                    <v-btn class="text-decoration-none" width="60" style="float: left;" @click="drawer = true;">
+                        <span>More</span>
+                        <v-icon>mdi-menu</v-icon>
+                    </v-btn><v-spacer></v-spacer>
+                    <v-btn
+                        class="text-decoration-none"
+                        grow
+                        v-for="(item, index) in navigation"
+                        :key="index"
+                        :to="item.url"
+                        v-if="item.bottomNav"
+                    >
+                        <span>{{ item.name }}</span>
+                        <v-icon>{{ item.icon }}</v-icon>
+                    </v-btn>
+                </template>
             </v-bottom-navigation>
         </template>
         <v-main :style="{background: $vuetify.theme.currentTheme.background, ...textStyling}" :class="{ eink: theme == 'eink'}">
@@ -107,8 +131,10 @@
     import TextStylingService from './../services/TextStylingService';
     import FontTypeService from './../services/FontTypeService';
     import { DefaultLocalStorageManager } from './../services/LocalStorageManagerService';
+    import OnboardingModal from './Mobile/OnboardingModal.vue';
     
     export default {
+        components: { OnboardingModal },
         data: function() {
             return {
                 selectedLanguage: this.$props._selectedLanguage,
@@ -119,6 +145,7 @@
                 themeSelectionDialog: false,
                 languageSelectionDialog: false,
                 startReviewDialog: false,
+                onboardingDialog: false,
                 drawer: false,
                 navbarVisible: true,
                 navbarCollapsed: false,
@@ -281,15 +308,28 @@
                 fontTypeService.loadSelectedFontTypeIntoDom();
                 fontTypeService.loadDefaultFontTypeIntoDom();
             });
-            // load branding
-            axios.post('/settings/global/get', { settingNames: ['siteTitle','siteIconUrl']}).then((response) => {
+            // load branding / mobile ui
+            axios.post('/settings/global/get', { settingNames: ['siteTitle','siteIconUrl','mobileUiStyle','mobileOnboardingEnabled']}).then((response) => {
                 if (response && response.data) {
                     this.siteTitle = response.data.siteTitle || '';
                     this.siteIconUrl = response.data.siteIconUrl || '';
+                    this.$store.commit('shared/setMobileUiStyle', response.data.mobileUiStyle || 'default');
+                    this.$store.commit('shared/setMobileOnboardingEnabled', !!response.data.mobileOnboardingEnabled);
+                    if (this.$store.getters['shared/mobileOnboardingEnabled']) {
+                        axios.post('/settings/user/get', { settingNames: ['onboardingCompleted']}).then(r=>{
+                            const done = r.data && r.data.onboardingCompleted === true;
+                            if (!done && (window.matchMedia && window.matchMedia('(max-width: 768px)').matches)) {
+                                this.onboardingDialog = true;
+                            }
+                        }).catch(()=>{});
+                    }
                 }
             }).catch(() => {});
         },
         methods: {
+            onboardingCompleted(data) {
+                // can trigger a toast or route to library
+            },
             initializeThemes() {
                 this.loadSelectedTheme();
                 ThemeService.setDefaultVuetifyTheme(this.$vuetify);
