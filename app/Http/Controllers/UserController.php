@@ -64,6 +64,11 @@ class UserController extends Controller {
         $oidcButtonText = $get('oidcButtonText', 'Login with SSO');
         $oidcButtonIcon = $get('oidcButtonIcon', 'mdi-shield-account');
         $oidcAutoLaunch = $get('oidcAutoLaunch', false) ? true : false;
+        $oidcConfig = [
+            'button_text' => $oidcButtonText,
+            'button_icon' => $oidcButtonIcon,
+            'auto_launch' => $oidcAutoLaunch,
+        ];
 
         return view('auth.login', [
             'userCount' => $userCount,
@@ -73,6 +78,7 @@ class UserController extends Controller {
             'oidcButtonText' => $oidcButtonText,
             'oidcButtonIcon' => $oidcButtonIcon,
             'oidcAutoLaunch' => $oidcAutoLaunch,
+            'oidcConfig' => $oidcConfig,
         ]);
     }
     
