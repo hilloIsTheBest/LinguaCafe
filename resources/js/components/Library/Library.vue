@@ -198,7 +198,7 @@
     export default {
         data: function() {
             return {
-                layout: DefaultLocalStorageManager.loadSetting('library-layout') || 'table',
+                layout: DefaultLocalStorageManager.loadSetting('library-layout') || (this.$store && this.$store.getters && this.$store.getters['shared/mobileUiStyle']==='lingq' ? 'lingq' : 'table'),
                 theme: DefaultLocalStorageManager.loadSetting('theme') || 'light',
                 books: [],
                 openedBook: -1,
