@@ -70,6 +70,11 @@
       <div class="mt-4">
         <v-btn color="primary" rounded depressed :loading="saving" @click="save">Save</v-btn>
         <v-btn text rounded class="ml-2" @click="load">Reset</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="secondary" rounded depressed class="ml-4" @click="testOidc">
+          <v-icon class="mr-2">mdi-open-in-new</v-icon>
+          Test OIDC Login
+        </v-btn>
       </div>
     </v-card>
   </div>
@@ -165,6 +170,18 @@ export default {
         oidcAdminGroup: this.adminGroup,
         oidcAdminPermission: this.adminPermission,
       }}).then(() => { this.saving = false; }).catch(() => { this.saving = false; });
+    },
+    testOidc() {
+      // Basic validation so we don't send user into a broken flow
+      if (!this.enabled) {
+        this.$root.$emit('showSnackbar', {color:'error', text:'Enable OIDC first, then save'});
+        return;
+      }
+      if (!this.issuer || !this.clientId) {
+        this.$root.$emit('showSnackbar', {color:'error', text:'Please set Issuer and Client ID, then save'});
+        return;
+      }
+      window.location.href = '/auth/oidc';
     }
   }
 }
