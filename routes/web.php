@@ -52,6 +52,7 @@ Route::post('/settings/branding/upload-icon', [SettingsController::class, 'uploa
 */
 Route::get('/auth/oidc', [OidcController::class, 'redirect'])->name('oidc.redirect');
 Route::get('/auth/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
+Route::get('/auth/oidc/logout', [OidcController::class, 'logout'])->name('oidc.logout');
 
 /*
 |--------------------------------------------------------------------------

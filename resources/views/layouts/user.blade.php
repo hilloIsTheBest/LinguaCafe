@@ -3,13 +3,16 @@
 <head>
     <meta charset="utf-8">
     <link href="/css/vuetify.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="/manifest.json"> 
     <link rel="icon" type="image/png" href="/icon512rounded.png">
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="/icon512rounded.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LinguaCafe">
+    <meta name="application-name" content="LinguaCafe">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon512rounded.png">
     <script>
         (function(){
             try {
@@ -31,8 +34,10 @@
     </script>
     @if ($theme === 'dark')
         <meta name="theme-color" content="#28272C" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     @else
         <meta name="theme-color" content="#F2F3F5" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
     @endif
 
     <!-- CSRF Token -->
@@ -41,6 +46,14 @@
     <title>LinguaCafe</title>
 
     <script src="{{ mix('js/app.js') }}" defer></script>
+    <script>
+      // Android install prompt capture (optional hook for future UI button)
+      window.deferredPWAInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPWAInstallPrompt = e;
+      });
+    </script>
     <script src="/js/dmak/raphael.js"></script>
     <script src="/js/dmak/dmak.js"></script>
     <script src="/js/dmak/dmakLoader.js"></script>

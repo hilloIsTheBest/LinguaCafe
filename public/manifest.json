@@ -1,24 +1,42 @@
 {
-    "short_name": "LinguaCafe",
-    "name": "Linguacafe",
-    "icons": [
-        {
-            "src": "/icon512.png",
-            "type": "image/png",
-            "sizes": "512x512",
-            "purpose": "any"
-        },
-        {
-            "src": "/icon512rounded.png",
-            "type": "image/png",
-            "sizes": "512x512",
-            "purpose": "maskable"
-        }
-    ],
-    "start_url": "/",
-    "background_color": "#F2F3F5",
-    "display": "standalone",
-    "scope": "/",
-    "theme_color": "#C5947D",
-    "description": "Foreign language reader"
+  "id": "/",
+  "name": "LinguaCafe",
+  "short_name": "LinguaCafe",
+  "description": "Foreign language reader",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#C5947D",
+  "background_color": "#F2F3F5",
+  "icons": [
+    {
+      "src": "/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon512rounded.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Books",
+      "short_name": "Books",
+      "url": "/books",
+      "icons": [{ "src": "/icon512rounded.png", "sizes": "512x512", "type": "image/png" }]
+    },
+    {
+      "name": "Playlists",
+      "short_name": "Playlists",
+      "url": "/playlists",
+      "icons": [{ "src": "/icon512rounded.png", "sizes": "512x512", "type": "image/png" }]
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false
 }

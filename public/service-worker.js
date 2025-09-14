@@ -1,70 +1,108 @@
 /**
- * Service Worker for PWA Caching
+ * LinguaCafe Service Worker (enhanced PWA)
  *
- * This worker uses a simple cache-first strategy for static assets and a network-first
- * strategy for API calls to keep data fresh while still providing offline support.
+ * - Precache Mix-built assets dynamically from /mix-manifest.json
+ * - Cache-first for static assets (css/js/fonts/images)
+ * - Network-first for API requests with cache fallback
+ * - Offline fallback page for navigations
  */
 
-const CACHE_NAME = 'linguacafe-cache-v1';
-const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/css/app.css',
-    '/js/app.js',
-    // Add any other assets that should be precached
-];
+const VERSION = 'v3';
+const STATIC_CACHE = `lc-static-${VERSION}`;
+const RUNTIME_CACHE = `lc-runtime-${VERSION}`;
+const OFFLINE_URL = '/offline.html';
 
-// Install event – cache static assets
+// Utility: add URL to cache ignoring opaque failures
+async function cacheAddAllSafe(cache, urls) {
+  for (const url of urls) {
+    try { await cache.add(url); } catch (e) { /* ignore */ }
+  }
+}
+
 self.addEventListener('install', (event) => {
-    console.log('[SW] Install');
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS);
-        })
-    );
-});
+  event.waitUntil((async () => {
+    self.skipWaiting();
+    const cache = await caches.open(STATIC_CACHE);
 
-// Activate event – clean up old caches
-self.addEventListener('activate', (event) => {
-    console.log('[SW] Activate');
-    event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(
-                keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        return caches.delete(key);
-                    }
-                })
-            )
-        )
-    );
-});
+    // Precache offline page
+    await cacheAddAllSafe(cache, [OFFLINE_URL]);
 
-// Fetch event – serve from cache or network
-self.addEventListener('fetch', (event) => {
-    const requestUrl = new URL(event.request.url);
-
-    // API requests: try network first, fallback to cache
-    if (requestUrl.origin === location.origin && requestUrl.pathname.startsWith('/api/')) {
-        event.respondWith(
-            fetch(event.request)
-                .then((response) => {
-                    // Clone and store in cache for future use
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-                    return response;
-                })
-                .catch(() => caches.match(event.request))
-        );
-    } else {
-        // Static assets: cache-first strategy
-        event.respondWith(
-            caches.match(event.request).then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-                return fetch(event.request);
-            })
-        );
+    // Precache Mix assets by reading /mix-manifest.json
+    try {
+      const res = await fetch('/mix-manifest.json', { cache: 'no-store' });
+      if (res.ok) {
+        const manifest = await res.json();
+        const assets = Object.values(manifest);
+        await cacheAddAllSafe(cache, assets);
+      }
+    } catch (e) {
+      // continue; we still have runtime caching
     }
+  })());
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => {
+      if (k !== STATIC_CACHE && k !== RUNTIME_CACHE) return caches.delete(k);
+    }));
+    await self.clients.claim();
+  })());
+});
+
+// Navigation requests: network-first with offline fallback
+async function handleNavigate(event) {
+  try {
+    const response = await fetch(event.request);
+    return response;
+  } catch (e) {
+    const cache = await caches.open(STATIC_CACHE);
+    const offline = await cache.match(OFFLINE_URL);
+    return offline || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+  }
+}
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only same-origin handled
+  if (url.origin !== location.origin) return;
+
+  // Navigations
+  if (req.mode === 'navigate') {
+    event.respondWith(handleNavigate(event));
+    return;
+  }
+
+  // API requests: network-first
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/settings/') || url.pathname.startsWith('/books') || url.pathname.startsWith('/playlists')) {
+    event.respondWith((async () => {
+      try {
+        const res = await fetch(req);
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(req, res.clone());
+        return res;
+      } catch (e) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        throw e;
+      }
+    })());
+    return;
+  }
+
+  // Static assets: cache-first with background update
+  if (['style', 'script', 'image', 'font'].includes(req.destination)) {
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      const fetchPromise = fetch(req).then(async (res) => {
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(req, res.clone());
+        return res;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })());
+  }
 });

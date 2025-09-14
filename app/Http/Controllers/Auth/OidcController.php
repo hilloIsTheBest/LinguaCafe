@@ -108,6 +108,22 @@ class OidcController extends Controller
         return $this->finalizeLogin($request, $oidc);
     }
 
+    public function logout(Request $request)
+    {
+        // Local logout
+        \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Optional RP-initiated logout
+        $logoutUrl = (string) ($this->getGlobalSetting('oidcLogoutUrl', '') ?: '');
+        if ($logoutUrl !== '') {
+            return redirect()->away($logoutUrl);
+        }
+
+        return redirect('/login');
+    }
+
     protected function finalizeLogin(Request $request, \Jumbojett\OpenIDConnectClient $oidc)
     {
         $email = null;

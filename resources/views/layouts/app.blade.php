@@ -2,13 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="/manifest.json"> 
     <link rel="icon" type="image/png" href="/icon512rounded.png">
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="/icon512rounded.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LinguaCafe">
+    <meta name="application-name" content="LinguaCafe">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon512rounded.png">
     <script>
         (function(){
             try {
@@ -38,6 +41,15 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <meta name="theme-color" content="#C5947D" />
+    <script>
+      // Android install prompt capture (optional hook for future UI button)
+      window.deferredPWAInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPWAInstallPrompt = e;
+      });
+    </script>
 
     <!-- These are dynamically set with javascript -->
     <style id="dynamic-default-font"></style>
