@@ -6,7 +6,7 @@ networks:
 
 services:
     webserver:
-        image: ghcr.io/hilloisthebest/linguacafe-webserver:${VERSION:-v0.4.0}
+        image: ghcr.io/hilloisthebest/linguacafe-webserver:${VERSION:-v0.4.3}
         container_name: linguacafe-webserver
         restart: unless-stopped
         depends_on:
@@ -16,14 +16,21 @@ services:
                 condition: service_started
         volumes:
             - ./storage:/var/www/html/storage
+            - ./docker/supervisord.conf:/var/www/html/config/supervisord.conf
             - ./docker/supervisor-horizon.conf:/etc/supervisor/conf.d/horizon.conf
             - ./docker/supervisor-websockets.conf:/etc/supervisor/conf.d/websockets.conf
         environment:
+            APP_ENV: ${APP_ENV:-production}
+            APP_URL: ${APP_URL:-http://localhost:${PORT:-9191}}
+            DB_CONNECTION: ${DB_CONNECTION:-mysql}
             DB_DATABASE: ${DB_DATABASE:-linguacafe}
             DB_USERNAME: ${DB_USERNAME:-linguacafe}
             DB_PASSWORD: ${DB_PASSWORD:-linguacafe}
             DB_HOST: ${DB_HOST:-linguacafe-database}
             DB_PORT: ${DB_PORT:-3306}
+            QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
+            CACHE_DRIVER: ${CACHE_DRIVER:-file}
+            SESSION_DRIVER: ${SESSION_DRIVER:-file}
             BACKUP_INTERVAL: "59 23 * * *"
             MAX_SAVED_BACKUPS: 14
         ports:
@@ -73,7 +80,7 @@ services:
         command: "python3 /app/tokenizer.py"
         restart: unless-stopped
         tty: true
-        image: ghcr.io/hilloisthebest/linguacafe-python-service:${VERSION:-v0.4.0}
+        image: ghcr.io/hilloisthebest/linguacafe-python-service:${VERSION:-v0.4.3}
         environment:
             PYTHONPATH: "/var/www/html/storage/app/model"
         volumes:
