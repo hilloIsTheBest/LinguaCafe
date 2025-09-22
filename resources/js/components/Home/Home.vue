@@ -1,6 +1,11 @@
 <template>
     <div>
-        <v-container id="home" class="pb-12">
+        <!-- Mobile LingQ-like home, shown when mobile style is enabled -->
+        <mobile-lingq-home v-if="$store && $store.getters && $store.getters['shared/mobileUiStyle']==='lingq' && $vuetify && $vuetify.breakpoint && $vuetify.breakpoint.smAndDown"
+                           :language="$props.language"
+                           :title="$props.language || 'Language'"/>
+
+        <v-container id="home" class="pb-12" v-else>
             <change-password-dialog
                 v-model="passwordChangeDialog"
                 @password-changed="passwordChangeFinished"
@@ -99,7 +104,9 @@
     import {formatNumber} from './../../helper.js';
     const moment = require('moment');
     import { DefaultLocalStorageManager } from './../../services/LocalStorageManagerService';
+    import MobileLingqHome from './../Mobile/MobileLingqHome.vue';
     export default {
+        components: { MobileLingqHome },
         data: function() {
             return {
                 theme: DefaultLocalStorageManager.loadSetting('theme') || 'light',
@@ -107,8 +114,7 @@
                 passwordChangeDialog: false
             }
         },
-        props: {
-        },
+        props: { language: String },
         mounted() {
             axios.get('/users/is-password-changed').then((response) => {
                 this.passwordChanged = Boolean(response.data);

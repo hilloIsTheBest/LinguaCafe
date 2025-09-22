@@ -4,10 +4,11 @@
         <!-- Dialogs -->
         <start-review-dialog v-model="startReviewDialog" />
         <logout-dialog v-model="logoutDialog"/>
-        <onboarding-modal v-if="$store.getters['shared/mobileOnboardingEnabled']"
-                          v-model="onboardingDialog"
-                          :default-language="selectedLanguage"
-                          @completed="onboardingCompleted"/>
+        <onboarding-modal v-if="$store.getters['shared/mobileOnboardingEnabled']" 
+                           v-model="onboardingDialog" 
+                           :default-language="selectedLanguage"
+                           @completed="onboardingCompleted"/>
+        <push-permission-gate />
 
         <template v-if="$router.currentRoute.path !== '/login'">
             <theme-selection-dialog v-model="themeSelectionDialog" @input="updateTheme"></theme-selection-dialog>
@@ -132,9 +133,10 @@
     import FontTypeService from './../services/FontTypeService';
     import { DefaultLocalStorageManager } from './../services/LocalStorageManagerService';
     import OnboardingModal from './Mobile/OnboardingModal.vue';
+    import PushPermissionGate from './Mobile/PushPermissionGate.vue';
     
     export default {
-        components: { OnboardingModal },
+        components: { OnboardingModal, PushPermissionGate },
         data: function() {
             return {
                 selectedLanguage: this.$props._selectedLanguage,

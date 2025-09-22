@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\Admin\OIDCController as AdminOIDCController;
 use App\Http\Controllers\PublicLibraryController;
+use App\Http\Controllers\PushController;
 use App\Http\Controllers\BookController;
 
 /*
@@ -105,3 +106,13 @@ Route::group(['middleware' => ['auth']], function () {
 Route::get('/admin/{any?}', [HomeController::class, 'index'])
     ->where('any', '.*')
     ->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
+| Web Push (VAPID)
+|--------------------------------------------------------------------------
+*/
+Route::get('/push/config', [PushController::class, 'config']);
+Route::post('/push/subscribe', [PushController::class, 'subscribe'])->middleware('auth');
+Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe'])->middleware('auth');
+Route::post('/push/test', [PushController::class, 'test'])->middleware('auth');

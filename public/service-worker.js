@@ -106,3 +106,30 @@ self.addEventListener('fetch', (event) => {
     })());
   }
 });
+
+// Push notifications
+self.addEventListener('push', function (event) {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch(e) {}
+  const title = data.title || 'LinguaCafe';
+  const options = {
+    body: data.body || '',
+    icon: '/icon512rounded.png',
+    badge: '/icon512rounded.png',
+    data: { url: data.url || '/' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  const url = (event.notification && event.notification.data && event.notification.data.url) || '/';
+  event.notification.close();
+  event.waitUntil(clients.matchAll({ type: 'window' }).then(windowClients => {
+    for (const client of windowClients) {
+      if (client.url.includes(self.location.origin)) {
+        return client.focus();
+      }
+    }
+    return clients.openWindow(url);
+  }));
+});

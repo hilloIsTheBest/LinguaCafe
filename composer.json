@@ -15,7 +15,8 @@
         "league/csv": "^9.16.0",
         "predis/predis": "^2.0",
         "pusher/pusher-php-server": "^7.2.4",
-        "jumbojett/openid-connect-php": "^1.0"
+        "jumbojett/openid-connect-php": "^1.0",
+        "minishlink/web-push": "^6.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
