@@ -6,7 +6,7 @@ networks:
 
 services:
     webserver:
-        image: ghcr.io/hilloisthebest/linguacafe-webserver:${VERSION:-v0.4.3}
+        image: ghcr.io/hilloisthebest/linguacafe-webserver:${VERSION:-v0.4.6}
         container_name: linguacafe-webserver
         restart: unless-stopped
         depends_on:
@@ -80,7 +80,7 @@ services:
         command: "python3 /app/tokenizer.py"
         restart: unless-stopped
         tty: true
-        image: ghcr.io/hilloisthebest/linguacafe-python-service:${VERSION:-v0.4.3}
+        image: ghcr.io/hilloisthebest/linguacafe-python-service:${VERSION:-v0.4.6}
         environment:
             PYTHONPATH: "/var/www/html/storage/app/model"
         volumes:
